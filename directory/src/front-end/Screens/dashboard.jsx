@@ -17,14 +17,15 @@ export default function Dashboard(){
     const handleEdit = (customer) => {
         setEditCustomer(customer);
         setShowAddModal(true);
+
     }
     
     const handleDelete = async (id) => {
         try{
-            await axios.delete(`/api/customer/${id}`);
-            window.location.reload();
+            await axios.delete(`/api/customers/${id}`);
+            console.log("Customer deleted");
         }catch (error) {
-            console.error('Delete filaed: ', error);
+            console.error('Delete failed: ', error);
         }
     }
     return(
@@ -39,8 +40,12 @@ export default function Dashboard(){
             <CustomerList onEdit={handleEdit} onDelete={handleDelete} />
 
             <CreateUserForm
+                key={editCustomer ? editCustomer.id : 'new'}
                 show={showAddModal}
-                onClose={() => setShowAddModal(false)}
+                onClose={() =>{
+                    setShowAddModal(false);
+                    setEditCustomer(null);
+                }}
                 existingData={editCustomer} //Autofill the form when modifying an existing customer
             />
         </>

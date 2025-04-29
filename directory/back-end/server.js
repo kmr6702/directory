@@ -48,16 +48,17 @@ app.get('/api/customers', async(req, res) => {
         const result = await pool.query('SELECT * FROM customers ORDER BY id');
         res.json(result.rows);
     }catch(err){
+        console.error('Database query error:', err); // <-- Add this line
         res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 //Delete a customer endpoint 
-app.delete('/api/customer/:id', async(req, res) => {
+app.delete('/api/customers/:id', async(req, res) => {
     const { id } = req.params;
 
     try{
-        await pool.query('DELETE FROM customers WHERE id = $1', [id]);
+        const result = await pool.query('DELETE FROM customers WHERE id = $1', [id]);
         res.status(204).send();
     }catch (err) {
         res.status(500).json({error: 'Inteneral Server Error'})
@@ -66,6 +67,7 @@ app.delete('/api/customer/:id', async(req, res) => {
 
 app.put('/api/customers/:id', async(req, res) => {
     const { id } = req.params;
+    console.log('ID', typeof id);
     const{
         customer_name,
         email,
@@ -78,8 +80,8 @@ app.put('/api/customers/:id', async(req, res) => {
 
     try{
         const result = await pool.query(
-            `UPDATE customers SET customer_name = $1, email = $2, company_name = $3, phone = $4, profile_picuture_url = $5, contract_start_date = $6, contract_end_date = $7 WHERE id = $8 RETURNING *`,
-            [customer_name, email, company_name, phone, profile_picture_url, contract_start_date, contract_end_date]
+            `UPDATE customers SET customer_name = $1, email = $2, company_name = $3, phone = $4, profile_picture_url = $5, contract_start_date = $6, contract_end_date = $7 WHERE id = $8 RETURNING *`,
+            [customer_name, email, company_name, phone, profile_picture_url, contract_start_date, contract_end_date, id]
         );
         res.json(result.rows[0]);
     }catch (err){

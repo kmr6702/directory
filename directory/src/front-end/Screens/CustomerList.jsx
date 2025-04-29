@@ -27,6 +27,7 @@ export default function CustomerList({ onEdit, onDelete }){
                             <th>Email</th>
                             <th>Company</th>
                             <th>Phone</th>
+                            <th>Profile Picture</th>
                             <th>Contract Start</th>
                             <th>Contract End</th>
                         </tr>
@@ -39,11 +40,21 @@ export default function CustomerList({ onEdit, onDelete }){
                                 <td>{customer.email}</td>
                                 <td>{customer.company_name}</td>
                                 <td>{customer.phone}</td>
+                                <td>{customer.pfp ? (
+                                    <img    
+                                        src={customer.pfp}
+                                        alt="Profile Picture"
+                                        style={{width: '50px', height: '50px', objectFit: 'cover'}}
+                                    />
+                                ) : (
+                                    'No image available'
+                                )}
+                                </td>
                                 <td>{new Date(customer.contract_start_date).toLocaleDateString()}</td>
                                 <td>{new Date(customer.contract_end_date).toLocaleDateString()}</td>
                                 <td>
                                     <Button
-                                        varient="warning"
+                                        variant="warning"
                                         size="sm"
                                         className="me-2"
                                         onClick={() => onEdit(customer)}
@@ -51,7 +62,7 @@ export default function CustomerList({ onEdit, onDelete }){
                                         Edit
                                     </Button>
                                     <Button
-                                        varient="danger"
+                                        variant="danger"
                                         size="sm"
                                         onClick={() => onDelete(customer.id)}
                                     >

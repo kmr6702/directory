@@ -27,7 +27,7 @@ export async function getCustomer(){
 //Delete a customer
 export async function deleteCustomer(id){
     try{
-        const response = await axios.delete('/api/customer/${id}');
+        const response = await axios.delete(`/api/customers/${id}`);
         return response.data;
     }catch (error){
         console.error('Failed to get customer: ', error);
@@ -38,10 +38,10 @@ export async function deleteCustomer(id){
 //modify a customer
 export async function modifyCustomer(id, updatedData){
     try{
-        const response = await axios.put('/api/customer/${id}', updatedData);
+        const response = await axios.put(`/api/customers/${id}`, updatedData);
         return response.data;
     }catch (error){
-        console.error('Failed to get customer: ', error);
+        console.error('Failed to modify customer: ', error);
         throw error; 
     }
 }

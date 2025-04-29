@@ -1,58 +1,105 @@
 import {Modal, Form, Col, Row, Button, FormControl } from 'react-bootstrap';
 import { createCustomer } from '../api/ApiCalls.js';
+import { modifyCustomer } from '../api/ApiCalls.js';
 import { useState } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"
+import { useEffect } from 'react';
 
 
-// customer_name VARCHAR(100),
-//     email VARCHAR(100),
-//     company_name VARCHAR(100),
-//     phone VARCHAR(100),
-//     profile_picture_url VARCHAR(100),
-//     contract_start_date DATE,
-//     contract_expire_date DATE
-
-export default function CreateCustomerForm({ show, onClose}){
+export default function CreateCustomerForm({ show, onClose, existingData}){
     const [customerName, setCustomerName] = useState('');   //Stores Customer name
     const [email, setEmail] = useState('');     //Stores customer email
     const [companyName, setCompanyName] = useState('');     //Stores the company Name
     const [phone, setPhone] = useState('');     //Stores customer phone
-    const [pfp, setPfp] = useState(null);     //Stores customer profile picture
-    const [startDate, setStartDate] = useState(null);     //Stores customer start date
+    const [pfp, setPfp] = useState('');     //Stores customer profile picture
+    const [startDate, setStartDate] = useState('');     //Stores customer start date
     const [endDate, setEndDate] = useState('');     //Stores customer end date
 
     //Sets up error handling for field validation
-    const [errors, setErrors] = useState({})
-    //customerName: '', email: '', companyName: '', phone: '', pfp: '', startDate: '', endDate: ''
+    const [errors, setErrors] = useState({customerName: '', email: '', companyName: '', phone: '', startDate: '', endDate: ''})
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const newErrors = {};
+        const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;   //Validate the format of the phone number
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;    //Validate the format of the email 
+
+        //Validates the format of the phone number
+        if(!phoneRegex.test(phone)){
+            alert("Phone number must be formatted as xxx-xxx-xxxx")
+            return;
+        }
+
+        //Validates the format of the email
+        if(!emailRegex.test(email)){
+            alert("Please enter a valid email address");
+            return;
+        }
+
+        //Error handleing ro ensure the form has no empty inputs
+        let newErrors = {customerName: '', email: '', companyName: '', phone: '', startDate: '', endDate: ''};
         if(!customerName) newErrors.customerName = 'Requried';
         if(!email) newErrors.email = 'Requried';
         if(!companyName) newErrors.companyName = 'Requried';
         if(!phone) newErrors.phone = 'Required';
+        if(!startDate) newErrors.startDate = 'Required';
+        if(!endDate) newErrors.endDate = 'Required';
 
+        setErrors(newErrors);
+
+        //Does not allow form submission if the form is not fully filled out
+        const hasErrors = Object.values(newErrors).some(error => error);
+        if(hasErrors) return; 
+
+        //The data that needs to be sent to the backend
         const customerData = {
             customer_name: customerName,
             email,
             phone,
+            company_name: companyName,
             profile_picture_url: pfp,
             contract_start_date: startDate,
             contract_end_date: endDate
         };
 
+        //Creates a new customer in the database
         try{
-            await createCustomer(customerData);
-            onClose();
+            if(existingData){
+                await modifyCustomer(existingData.id, customerData);
+            }else{
+                await createCustomer(customerData);
+            }
         }catch (error){
             console.error("Error adding user:", error);
         }
 
+        console.log('Company Name:', companyName); // Add this to debug
+
         onClose();
     };
+
+    //Will autofill the form if modifying
+    useEffect(() => {
+        if(existingData){
+            setCustomerName(existingData.customer_name || '');
+            setEmail(existingData.email || '');
+            setCompanyName(existingData.company_name || '');
+            setPhone(existingData.phone || '');
+            setPfp(existingData.profile_picture_url || '');
+            setStartDate(existingData.contract_start_date ? new Date(existingData.contract_start_date) : '');
+            setEndDate(existingData.contract_end_date ? new Date(existingData.contract_end_date) : '')
+        }else{
+            setCustomerName('');
+            setEmail('');
+            setCompanyName('');
+            setPhone('');
+            setPfp('');
+            setStartDate('');
+            setEndDate('');
+        }
+    }, [existingData]);
+
     return(
         <Modal show={show} onHide={onClose}>
             <Modal.Header closeButton>
@@ -66,10 +113,12 @@ export default function CreateCustomerForm({ show, onClose}){
                             Name
                         </Form.Label>
                         <Col md="10">
-                            <Form.Control type='text'>
+                            <Form.Control 
+                                type='text'
                                 value={customerName}
                                 onChange={(e) => setCustomerName(e.target.value)}
                                 isInvalid={!!errors.customerName}
+                            >
                             </Form.Control>
                         </Col>
                     </Form.Group>
@@ -80,10 +129,12 @@ export default function CreateCustomerForm({ show, onClose}){
                             Email
                         </Form.Label>
                         <Col md="10">
-                            <Form.Control type='text'>
+                            <Form.Control
+                                type="text"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 isInvalid={!!errors.email}
+                            >
                             </Form.Control>
                         </Col>
                     </Form.Group>
@@ -94,10 +145,12 @@ export default function CreateCustomerForm({ show, onClose}){
                             Company
                         </Form.Label>
                         <Col md="10">
-                            <Form.Control type='text'>
+                            <Form.Control
+                                type="text"
                                 value={companyName}
                                 onChange={(e) => setCompanyName(e.target.value)}
                                 isInvalid={!!errors.companyName}
+                            >
                             </Form.Control>
                         </Col>
                     </Form.Group>
@@ -108,10 +161,12 @@ export default function CreateCustomerForm({ show, onClose}){
                             Phone
                         </Form.Label>
                         <Col md="10">
-                            <Form.Control type='text'>
+                            <Form.Control
+                                type="text"
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 isInvalid={!!errors.phone}
+                            >
                             </Form.Control>
                         </Col>
                     </Form.Group>
@@ -122,10 +177,11 @@ export default function CreateCustomerForm({ show, onClose}){
                             Profile Picture
                         </Form.Label>
                         <Col md="10">
-                            <Form.Control type='text'>
+                            <Form.Control
+                                type="text"
                                 value={pfp}
                                 onChange={(e) => setPfp(e.target.value)}
-                                isInvalid={!!errors.pfp}
+                            >
                             </Form.Control>
                         </Col>
                     </Form.Group>
@@ -156,7 +212,7 @@ export default function CreateCustomerForm({ show, onClose}){
                         </Col>
                     </Form.Group>
 
-
+                    <Button variant="primary" type="submit">Add</Button>
                 </Form>
             </Modal.Body>
 
