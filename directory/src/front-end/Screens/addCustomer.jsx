@@ -1,6 +1,6 @@
 import {Modal, Form, Col, Row, Button, FormControl } from 'react-bootstrap';
-import { createUser } from '../api/ApiCalls';
-import { use, useState } from 'react';
+import { createCustomer } from '../api/ApiCalls.js';
+import { useState } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"
 
@@ -13,7 +13,7 @@ import "react-datepicker/dist/react-datepicker.css"
 //     contract_start_date DATE,
 //     contract_expire_date DATE
 
-export default function createUserForm({ show, onClose}){
+export default function CreateCustomerForm({ show, onClose}){
     const [customerName, setCustomerName] = useState('');   //Stores Customer name
     const [email, setEmail] = useState('');     //Stores customer email
     const [companyName, setCompanyName] = useState('');     //Stores the company Name
@@ -26,7 +26,7 @@ export default function createUserForm({ show, onClose}){
     const [errors, setErrors] = useState({})
     //customerName: '', email: '', companyName: '', phone: '', pfp: '', startDate: '', endDate: ''
 
-    const handleSumbit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const newErrors = {};
@@ -45,15 +45,16 @@ export default function createUserForm({ show, onClose}){
         };
 
         try{
-            await createUser(customerData);
+            await createCustomer(customerData);
             onClose();
         }catch (error){
             console.error("Error adding user:", error);
         }
 
+        onClose();
     };
     return(
-        <Modal>
+        <Modal show={show} onHide={onClose}>
             <Modal.Header closeButton>
                 <Modal.Title>Add New Customer</Modal.Title>
             </Modal.Header>
