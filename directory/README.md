@@ -9,10 +9,7 @@ Setting up the system locally:
 1. Clone the repository
  https://github.com/kmr6702/directory.git
 
-2. Use npm to install all dependencies
- npm install 
-
-3. Set up PostgreSQL database
+2. Set up PostgreSQL database
  Open PostgreSQL terminal 
  Create a new database ex: CREATE DATABASE customers;
  Add a table by running the following SQL command:
@@ -29,7 +26,7 @@ Setting up the system locally:
         );
  In server.js replace username, database, and password with your information 
 
-4. Start the system 
+3. Start the system 
  Navigate into the back-end folder 
  Run `node server.js`
  Navigate into the directory folder with `cd directory`
